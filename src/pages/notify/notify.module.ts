@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core';
 import { TranslateModule } from '@ngx-translate/core';
 import { IonicPageModule } from 'ionic-angular';
 import { Geolocation } from '@ionic-native/geolocation';
-
+import { Push} from '@ionic-native/push';
 import { NotifyPage } from './notify';
 
 @NgModule({
@@ -16,6 +16,6 @@ import { NotifyPage } from './notify';
   exports: [
     NotifyPage
   ],
-  providers: [Geolocation]
+  providers: [Geolocation, Push]
 })
 export class NotifyPageModule { }
