@@ -12,6 +12,7 @@ import { IonicApp, IonicErrorHandler, IonicModule } from 'ionic-angular';
 import { Items } from '../mocks/providers/items';
 import { Settings, User, Api, SocketAzure } from '../providers';
 import { MyApp } from './app.component';
+import { Push } from '@ionic-native/push';
 
 
 export function createTranslateLoader(http: HttpClient) {
@@ -56,6 +57,7 @@ export function provideSettings(storage: Storage) {
     SplashScreen,
     StatusBar,
     SocketAzure,
+    Push,
     { provide: Settings, useFactory: provideSettings, deps: [Storage] },
     // Keep this to enable Ionic's runtime error handling during development
     { provide: ErrorHandler, useClass: IonicErrorHandler }

@@ -62,6 +62,7 @@
         "GEOLOCATION_USAGE_DESCRIPTION": "To locate you"
       },
       "phonegap-plugin-push": {
+        "SENDER_ID": "772638617405",
         "FCM_VERSION": "11.6.2"
       },
       "cordova-plugin-websocket": {}

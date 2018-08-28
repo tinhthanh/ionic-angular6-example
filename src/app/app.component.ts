@@ -9,6 +9,8 @@ import { Settings } from '../providers';
 import * as Stomp from 'stompjs';
 import * as SockJS from 'sockjs-client';
 import { SocketAzure } from '../providers/socket/socket-azure';
+import { Push, PushObject, PushOptions } from '@ionic-native/push';
+
 @Component({
   template: `<ion-menu [content]="content">
     <ion-header>
@@ -48,7 +50,7 @@ export class MyApp {
     { title: 'Search', component: 'SearchPage' }
   ]
 
-  constructor(private socketAzure: SocketAzure, private translate: TranslateService, platform: Platform, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
+  constructor(private push: Push,private socketAzure: SocketAzure, private translate: TranslateService, platform: Platform, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
     this.initializeWebSocketConnection();
     this.socketAzure.getMessage().subscribe( r => {
       if(r.type === this.socketAzure.type.create ) {
@@ -62,6 +64,28 @@ export class MyApp {
       this.splashScreen.hide();
     });
     this.initTranslate();
+    this.pushSetup();
+  }
+  public pushSetup(){
+    const options: PushOptions = {
+      android: {
+        senderID: '772638617405'
+      },
+      ios: {
+          alert: 'true',
+          badge: true,
+          sound: 'false'
+      }
+   };
+   
+   const pushObject: PushObject = this.push.init(options);
+   
+   
+   pushObject.on('notification').subscribe((notification: any) => console.log('Received a notification', notification));
+   
+   pushObject.on('registration').subscribe((registration: any) => console.log('Device registered', registration));
+   
+   pushObject.on('error').subscribe(error => console.error('Error with Push plugin', error));
   }
 
   initTranslate() {
