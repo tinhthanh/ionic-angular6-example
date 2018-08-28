@@ -6,7 +6,9 @@ import { Config, Nav, Platform } from 'ionic-angular';
 
 import { FirstRunPage } from '../pages';
 import { Settings } from '../providers';
-
+import * as Stomp from 'stompjs';
+import * as SockJS from 'sockjs-client';
+import { SocketAzure } from '../providers/socket/socket-azure';
 @Component({
   template: `<ion-menu [content]="content">
     <ion-header>
@@ -28,7 +30,8 @@ import { Settings } from '../providers';
 })
 export class MyApp {
   rootPage = FirstRunPage;
-
+  private serverUrl = 'https://ionic-service.azurewebsites.net/ws/socket'
+  private stompClient;
   @ViewChild(Nav) nav: Nav;
 
   pages: any[] = [
@@ -45,7 +48,13 @@ export class MyApp {
     { title: 'Search', component: 'SearchPage' }
   ]
 
-  constructor(private translate: TranslateService, platform: Platform, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
+  constructor(private socketAzure: SocketAzure, private translate: TranslateService, platform: Platform, settings: Settings, private config: Config, private statusBar: StatusBar, private splashScreen: SplashScreen) {
+    this.initializeWebSocketConnection();
+    this.socketAzure.getMessage().subscribe( r => {
+      if(r.type === this.socketAzure.type.create ) {
+          this.sendMessage(JSON.stringify(r));
+      }
+    })
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
@@ -86,4 +95,30 @@ export class MyApp {
     // we wouldn't want the back button to show in this scenario
     this.nav.setRoot(page.component);
   }
+  ionViewDidLoad() { 
+
+
+  }
+  initializeWebSocketConnection(){
+    let ws = new SockJS(this.serverUrl);
+    this.stompClient = Stomp.over(ws);
+    let that = this;
+    this.stompClient.connect({}, function(frame) {
+      that.stompClient.subscribe("/chat", (message) => {
+        if(message.body) {
+        //  that.socketAzure.sendMessage(JSON.stringify(message.body));
+          // console.log(message.body);
+         const data = JSON.parse(message.body) ;
+           if(data.type === that.socketAzure.type.create ) {
+             that.socketAzure.actionSave.next(data.body);
+           }
+        }
+      });
+    });
+  }
+  public sendMessage(message){
+    this.stompClient.send("/app/send/message" , {}, message);
+  }
+
+
 }

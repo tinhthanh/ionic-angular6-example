@@ -3,6 +3,7 @@ import { IonicPage, ModalController, NavController } from 'ionic-angular';
 
 import { Item } from '../../models/item';
 import { Items } from '../../providers';
+import { SocketAzure } from '../../providers/socket/socket-azure';
 
 @IonicPage()
 @Component({
@@ -12,14 +13,18 @@ import { Items } from '../../providers';
 export class ListMasterPage {
   currentItems: Item[];
 
-  constructor(public navCtrl: NavController, public items: Items, public modalCtrl: ModalController) {
+  constructor(public navCtrl: NavController, public items: Items, public modalCtrl: ModalController, private socketAzure: SocketAzure) {
     this.currentItems = this.items.query();
+    this.socketAzure.actionSave.asObservable().subscribe( item => {
+      this.items.add(item);
+    })
   }
 
   /**
    * The view loaded, let's query our items for the list
    */
   ionViewDidLoad() {
+    
   }
 
   /**
@@ -30,7 +35,7 @@ export class ListMasterPage {
     let addModal = this.modalCtrl.create('ItemCreatePage');
     addModal.onDidDismiss(item => {
       if (item) {
-        this.items.add(item);
+        this.socketAzure.sendMessage(item,this.socketAzure.type.create);
       }
     })
     addModal.present();
